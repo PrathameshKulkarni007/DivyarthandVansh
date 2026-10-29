@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biomimicry & Environmental Engineering Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ocean: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#032b45',
+                        },
+                        bio: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030a16;
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(13, 25, 48, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-panel-glow-blue {
+            box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .glass-panel-glow-green {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .glass-panel-glow-amber {
+            box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030a16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* Gradient animations */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        .pulse-glow {
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 8px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            transition: transform 0.1s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Tab active state transition */
+        .tab-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-btn.active {
+            background: rgba(14, 165, 233, 0.15);
+            border-color: rgba(56, 189, 248, 0.5);
+            color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-ocean-500 selection:text-white">
+
+    <!-- Background Ambient Glows -->
+    <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-ocean-500/10 rounded-full blur-[120px] pointer-events-none pulse-glow"></div>
+    <div class="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-bio-500/10 rounded-full blur-[120px] pointer-events-none pulse-glow" style="animation-delay: 2s;"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Branding / Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-ocean-400 via-bio-500 to-amber-500 p-[2px]">
+                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                        <i data-lucide="waves" class="w-5 h-5 text-ocean-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        Biomimicry & Environmental Engineering
+                    </h1>
+                    <p class="text-xs text-slate-400 flex items-center gap-2">
+                        <span>Presented by Divyarth Mote & Vansh Tunwal</span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-ocean-400"></span>
+                        <span class="text-ocean-400 font-mono">Interactive Research Dashboard</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <nav class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto max-w-full pb-1 md:pb-0">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> Overview
+                </button>
+                <button onclick="switchTab('diatom')" id="tab-diatom" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="microscope" class="w-3.5 h-3.5"></i> Diatom Filtration
+                </button>
+                <button onclick="switchTab('sahara')" id="tab-sahara" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="sun" class="w-3.5 h-3.5"></i> Sahara Forest
+                </button>
+                <button onclick="switchTab('synergy')" id="tab-synergy" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="git-compare" class="w-3.5 h-3.5"></i> Comparative & Synergy
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-transparent flex items-center gap-1.5 whitespace-nowrap text-slate-300 hover:text-white">
+                    <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Quiz & References
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-8 flex-1">
+
+        <!-- SECTION 1: OVERVIEW -->
+        <section id="section-overview" class="tab-content space-y-8">
+            
+            <!-- Hero Banner -->
+            <div class="relative glass-panel rounded-2xl p-6 lg:p-10 overflow-hidden border border-ocean-500/20">
+                <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-ocean-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 max-w-3xl space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border border-ocean-400/30 text-ocean-400 text-xs font-semibold uppercase tracking-wider">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Next-Gen Bio-Inspired Solutions
+                    </div>
+                    <h2 class="text-3xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                        Diatom-Inspired Filtration & The Sahara Forest Project
+                    </h2>
+                    <p class="text-slate-300 text-sm lg:text-base leading-relaxed">
+                        Solving global water scarcity through nanoscale micro-algae biological designs and scalable integrated desert revegetation ecosystems.
+                    </p>
+                    
+                    <div class="pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-300">
+                        <div class="flex items-center gap-2 glass-panel px-3 py-2 rounded-lg">
+                            <i data-lucide="user" class="w-4 h-4 text-bio-400"></i>
+                            <span>Divyarth Mote</span>
+                        </div>
+                        <div class="flex items-center gap-2 glass-panel px-3 py-2 rounded-lg">
+                            <i data-lucide="user" class="w-4 h-4 text-bio-400"></i>
+                            <span>Vansh Tunwal</span>
+                        </div>
+                        <div class="flex items-center gap-2 glass-panel px-3 py-2 rounded-lg text-amber-400">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                            <span>Biomimicry & Environmental Engineering</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Water Scarcity Context Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Stat Card 1 -->
+                <div class="glass-panel glass-panel-glow-blue rounded-xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-ocean-400">Global Water Scarcity</p>
+                            <h3 class="text-3xl font-extrabold text-white mt-2">2.0+ Billion</h3>
+                            <p class="text-xs text-slate-400 mt-1">People currently lack access to safe drinking water globally.</p>
+                        </div>
+                        <div class="p-3 bg-ocean-500/10 rounded-xl border border-ocean-500/20 text-ocean-400">
+                            <i data-lucide="droplets" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="glass-panel glass-panel-glow-amber rounded-xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-amber-400">2030 Projected Gap</p>
+                            <h3 class="text-3xl font-extrabold text-white mt-2">40% Deficit</h3>
+                            <p class="text-xs text-slate-400 mt-1">Global water demand projected to exceed supply by 2030.</p>
+                        </div>
+                        <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">
+                            <i data-lucide="trending-down" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="glass-panel glass-panel-glow-green rounded-xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-bio-400">Carbon Regulation</p>
+                            <h3 class="text-3xl font-extrabold text-white mt-2">~20% Global CO₂</h3>
+                            <p class="text-xs text-slate-400 mt-1">Natural diatoms fix one-fifth of Earth's total carbon emissions.</p>
+                        </div>
+                        <div class="p-3 bg-bio-500/10 rounded-xl border border-bio-500/20 text-bio-400">
+                            <i data-lucide="leaf" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Biomimicry Paradigm Explanation -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-panel rounded-xl p-6 space-y-4 border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-ocean-500/10 rounded-lg text-ocean-400">
+                            <i data-lucide="dna" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">What is Biomimicry in Water Engineering?</h3>
+                    </div>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        Conventional water treatment technologies rely heavily on high-pressure pumps, synthetic polymer membranes, and intensive chemical dosing—creating massive carbon footprints and secondary chemical waste.
+                    </p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        <strong class="text-ocean-400">Biomimicry</strong> translates nature’s time-tested evolutionary strategies into sustainable engineering. By emulating how microscopic diatoms filter water at the molecular level with near-zero energy, engineers can produce resilient, zero-waste bio-inspired filtration networks.
+                    </p>
+                </div>
+
+                <div class="glass-panel rounded-xl p-6 space-y-4 border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-bio-500/10 rounded-lg text-bio-400">
+                            <i data-lucide="globe" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">The Dual-Approach Paradigm</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex items-start gap-3">
+                            <i data-lucide="filter" class="w-4 h-4 text-ocean-400 mt-0.5"></i>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">1. Microscale Innovation: Diatom Membranes</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Nanoporous silica frustules enabling energy-efficient molecular sieving (10-200nm) without chemical pollutants.</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex items-start gap-3">
+                            <i data-lucide="sun" class="w-4 h-4 text-amber-400 mt-0.5"></i>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">2. Macroscale Integration: Sahara Forest Project</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Combines solar energy, seawater greenhouses, and desert revegetation to transform hyper-arid waste into food, water, and green cover.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 2: DIATOM FILTRATION DEEP-DIVE -->
+        <section id="section-diatom" class="tab-content hidden space-y-8">
+            
+            <!-- Section Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6 rounded-xl border border-ocean-500/20">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold text-ocean-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="microscope" class="w-3.5 h-3.5"></i> Microscale Architecture
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Diatom Biology & Nanoporous Filtration</h2>
+                    <p class="text-xs text-slate-400 mt-1">Exploring the microscopic silica frustules of unicellular algae and simulating nanoscale filtration mechanics.</p>
+                </div>
+                <div class="glass-panel px-4 py-2 rounded-lg text-xs text-slate-300 font-mono">
+                    Frustule Pore Sizes: <span class="text-ocean-400 font-bold">10 – 200 nm</span>
+                </div>
+            </div>
+
+            <!-- Biology Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 rounded-xl space-y-3">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="circle-dot" class="w-4 h-4 text-ocean-400"></i> What are Diatoms?
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Diatoms are microscopic, single-celled photosynthetic algae found in virtually every aquatic environment worldwide. Their most defining feature is their cell wall—known as a <strong class="text-ocean-400">frustule</strong>—which is composed of pure hydrated silicon dioxide (silica).
+                    </p>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        These frustules exhibit naturally self-assembled 3D porous architectures featuring intricate patterns of pores on the nanometer scale. They maintain structural stability under immense mechanical pressures while maximizing fluid throughput.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-xl space-y-3">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-bio-400"></i> Nanoporous Trapping Mechanics
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-bio-400 shrink-0 mt-0.5"></i>
+                            <span><strong>Selective Molecular Sieving:</strong> Pore geometries (10–200 nm) block bacteria, microplastics, heavy metal precipitates, and viral pathogens physically based on kinetic diameter.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-bio-400 shrink-0 mt-0.5"></i>
+                            <span><strong>High Surface Area Flow:</strong> Hierarchical honeycomb nanopores minimize fluid drag, enabling extremely high hydraulic flux with significantly reduced energy input compared to synthetic reverse osmosis (RO).</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE NANOPOROUS FILTRATION SIMULATOR -->
+            <div class="glass-panel glass-panel-glow-blue p-6 rounded-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-5 h-5 text-ocean-400"></i> Interactive Nanopore Filtration Simulator
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Adjust pore size and fluid flow velocity to test how effectively diatom frustules trap various contaminants.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="sim-toggle-btn" onclick="toggleSimulation()" class="px-4 py-2 rounded-lg bg-ocean-500 hover:bg-ocean-400 text-slate-950 font-semibold text-xs transition flex items-center gap-1.5">
+                            <i data-lucide="pause" id="sim-icon" class="w-3.5 h-3.5"></i>
+                            <span id="sim-btn-text">Pause Simulation</span>
+                        </button>
+                        <button onclick="resetSimulation()" class="px-3 py-2 rounded-lg glass-panel hover:bg-slate-800 text-slate-300 text-xs transition flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Controls & Canvas Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Controls Sidebar -->
+                    <div class="space-y-6 glass-panel p-4 rounded-lg border border-slate-800">
+                        <!-- Pore Size Slider -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label class="font-semibold text-slate-300">Pore Diameter</label>
+                                <span id="pore-val" class="font-mono text-ocean-400 font-bold">50 nm</span>
+                            </div>
+                            <input type="range" id="pore-slider" min="10" max="200" value="50" class="w-full" oninput="updateSimParams()">
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                                <span>10 nm (Ultra-Fine)</span>
+                                <span>200 nm (Macro)</span>
+                            </div>
+                        </div>
+
+                        <!-- Flow Velocity Slider -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label class="font-semibold text-slate-300">Flow Rate Velocity</label>
+                                <span id="flow-val" class="font-mono text-bio-400 font-bold">Medium</span>
+                            </div>
+                            <input type="range" id="flow-slider" min="1" max="5" value="3" class="w-full" oninput="updateSimParams()">
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                                <span>1x Low</span>
+                                <span>5x High</span>
+                            </div>
+                        </div>
+
+                        <!-- Legend / Contaminant Key -->
+                        <div class="space-y-2 border-t border-slate-800 pt-4">
+                            <p class="text-xs font-bold text-slate-300">Particle Key & Sizes:</p>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-300"></span> Water Molecule
+                                    </span>
+                                    <span class="font-mono text-[10px]">~0.3 nm</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full bg-purple-400"></span> Heavy Metal Ions
+                                    </span>
+                                    <span class="font-mono text-[10px]">~15 nm</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="flex items-center gap-2">
+                                        <span class="w-3.5 h-3.5 rounded-full bg-amber-400"></span> Pathogens / Viruses
+                                    </span>
+                                    <span class="font-mono text-[10px]">~45 nm</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="flex items-center gap-2">
+                                        <span class="w-4 h-4 rounded-full bg-red-500"></span> Bacteria
+                                    </span>
+                                    <span class="font-mono text-[10px]">~110 nm</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="flex items-center gap-2">
+                                        <span class="w-4.5 h-4.5 rounded-sm bg-pink-500"></span> Microplastics
+                                    </span>
+                                    <span class="font-mono text-[10px]">~160 nm</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Realtime Filter Status -->
+                        <div class="p-3 bg-slate-900/80 rounded-lg border border-slate-800 space-y-1 text-xs">
+                            <span class="text-slate-400 text-[10px] uppercase font-mono tracking-wider">Filtration Status:</span>
+                            <p id="filter-status-text" class="text-bio-400 font-semibold">Blocking Microplastics, Bacteria & Pathogens</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Canvas Area -->
+                    <div class="lg:col-span-3 flex flex-col space-y-3">
+                        <div class="relative w-full h-[360px] bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">
+                            <canvas id="diatomCanvas" class="w-full h-full block"></canvas>
+
+                            <!-- Flow Direction Indicator Overlay -->
+                            <div class="absolute top-3 left-3 glass-panel px-3 py-1 rounded text-[10px] font-mono text-slate-300 flex items-center gap-1.5 pointer-events-none">
+                                <span>Unfiltered Water Feed</span>
+                                <i data-lucide="arrow-right" class="w-3 h-3 text-ocean-400"></i>
+                                <span class="text-ocean-400 font-bold">Diatom Nanopore Membrane</span>
+                                <i data-lucide="arrow-right" class="w-3 h-3 text-bio-400"></i>
+                                <span class="text-bio-400">Permeate Yield</span>
+                            </div>
+                        </div>
+
+                        <!-- Realtime Stats Footer -->
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="glass-panel p-2.5 rounded-lg">
+                                <span class="text-[10px] text-slate-400 block uppercase font-mono">Trapped Contaminants</span>
+                                <span id="stat-trapped" class="text-base font-extrabold text-red-400 font-mono">0</span>
+                            </div>
+                            <div class="glass-panel p-2.5 rounded-lg">
+                                <span class="text-[10px] text-slate-400 block uppercase font-mono">Clean Water Yield</span>
+                                <span id="stat-passed" class="text-base font-extrabold text-bio-400 font-mono">0</span>
+                            </div>
+                            <div class="glass-panel p-2.5 rounded-lg">
+                                <span class="text-[10px] text-slate-400 block uppercase font-mono">Filtration Efficiency</span>
+                                <span id="stat-efficiency" class="text-base font-extrabold text-ocean-400 font-mono">98.4%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conventional vs Diatom Comparison -->
+            <div class="glass-panel p-6 rounded-xl space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="scale" class="w-5 h-5 text-bio-400"></i> Diatom Nanofiltration vs. Conventional Polymer Filters
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left text-slate-300">
+                        <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400 font-mono">
+                            <tr>
+                                <th class="p-3 rounded-l-lg">Feature</th>
+                                <th class="p-3 text-ocean-400">Diatom Bio-Inspired Membrane</th>
+                                <th class="p-3 text-slate-400">Conventional Polymer Filter</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Filtration Precision</td>
+                                <td class="p-3 text-bio-400 font-medium">Ultra-high (Nanoporous 10–200 nm precision)</td>
+                                <td class="p-3 text-slate-400">Variable / Microfiltration range</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Energy Demand</td>
+                                <td class="p-3 text-bio-400 font-medium">Low hydraulic resistance due to silica pore geometries</td>
+                                <td class="p-3 text-amber-400 font-medium">High (Requires intense pumping pressure)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Environmental Footprint</td>
+                                <td class="p-3 text-bio-400 font-medium">Biodegradable natural silica material</td>
+                                <td class="p-3 text-red-400 font-medium">Synthetic polymer waste & microplastic shedding</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Chemical Resistance</td>
+                                <td class="p-3 text-bio-400 font-medium">Naturally resistant to biofouling & oxidation</td>
+                                <td class="p-3 text-slate-400">Prone to biofouling; frequent chemical backwashing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Engineering Challenges & Future Scope -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-amber-500">
+                    <div class="flex items-center gap-2 text-amber-400 font-bold text-xs">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Durability & Fragility
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Pure biological silica structures can be physically fragile under sudden high-shear mechanical stress, requiring ceramic/nanocomposite reinforcement.
+                    </p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-ocean-500">
+                    <div class="flex items-center gap-2 text-ocean-400 font-bold text-xs">
+                        <i data-lucide="cpu" class="w-4 h-4"></i> Nanotech Manufacturing
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Replicating complex biological frustule architectures uniformly at industrial scale remains a complex challenge for nanomanufacturing.
+                    </p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-bio-500">
+                    <div class="flex items-center gap-2 text-bio-400 font-bold text-xs">
+                        <i data-lucide="maximize" class="w-4 h-4"></i> System Scalability
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Transitioning from lab-scale cell cultures to municipal-scale continuous flow water purification facilities demands optimized modular cassette designs.
+                    </p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl space-y-2 border-l-4 border-purple-500">
+                    <div class="flex items-center gap-2 text-purple-400 font-bold text-xs">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Genetic Bio-Engineering
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Future research explores genetic modification of diatom species to customize pore size distribution for specific contaminant profiles.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 3: THE SAHARA FOREST PROJECT DEEP-DIVE -->
+        <section id="section-sahara" class="tab-content hidden space-y-8">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6 rounded-xl border border-amber-500/20">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="sun" class="w-3.5 h-3.5"></i> Macroscale Ecosystem Engineering
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">The Sahara Forest Project (SFP)</h2>
+                    <p class="text-xs text-slate-400 mt-1">An integrated eco-system combining solar energy, seawater greenhouses, and desert revegetation.</p>
+                </div>
+                <div class="glass-panel px-4 py-2 rounded-lg text-xs text-slate-300 font-mono">
+                    Core Mission: <span class="text-amber-400 font-bold">Turning Arid Deserts Green</span>
+                </div>
+            </div>
+
+            <!-- SFP Key Metrics Summary Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel glass-panel-glow-green p-4 rounded-xl text-center space-y-1">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Carbon Capture</span>
+                    <h4 class="text-2xl font-extrabold text-bio-400 font-mono">85,000</h4>
+                    <p class="text-[10px] text-slate-400">tCO₂ / year sequestered</p>
+                </div>
+                <div class="glass-panel glass-panel-glow-blue p-4 rounded-xl text-center space-y-1">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Freshwater Yield</span>
+                    <h4 class="text-2xl font-extrabold text-ocean-400 font-mono">93%</h4>
+                    <p class="text-[10px] text-slate-400">High-purity yield efficiency</p>
+                </div>
+                <div class="glass-panel glass-panel-glow-amber p-4 rounded-xl text-center space-y-1">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Crop Growth</span>
+                    <h4 class="text-2xl font-extrabold text-amber-400 font-mono">+40%</h4>
+                    <p class="text-[10px] text-slate-400">Expanded arable area</p>
+                </div>
+                <div class="glass-panel glass-panel-glow-blue p-4 rounded-xl text-center space-y-1">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Socio-Economic</span>
+                    <h4 class="text-2xl font-extrabold text-purple-400 font-mono">+3,500</h4>
+                    <p class="text-[10px] text-slate-400">Green jobs created</p>
+                </div>
+            </div>
+
+            <!-- Interactive SFP System Flow Simulation -->
+            <div class="glass-panel glass-panel-glow-amber p-6 rounded-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-5 h-5 text-amber-400"></i> Interactive Sahara System Yield Simulator
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Adjust environmental inputs to observe live energy, freshwater, crop production, and carbon offset calculations.</p>
+                    </div>
+                </div>
+
+                <!-- Controls & Flow Visualizer -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Controls -->
+                    <div class="space-y-6 glass-panel p-5 rounded-lg border border-slate-800">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">System Operational Inputs</h4>
+                        
+                        <!-- Solar Radiation Input -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label class="font-semibold text-slate-300 flex items-center gap-1.5">
+                                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i> Solar Irradiance
+                                </label>
+                                <span id="sfp-solar-val" class="font-mono text-amber-400 font-bold">85%</span>
+                            </div>
+                            <input type="range" id="sfp-solar-slider" min="20" max="100" value="85" class="w-full" oninput="calculateSFPYields()">
+                        </div>
+
+                        <!-- Seawater Flow Input -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label class="font-semibold text-slate-300 flex items-center gap-1.5">
+                                    <i data-lucide="waves" class="w-3.5 h-3.5 text-ocean-400"></i> Seawater Intake Volume
+                                </label>
+                                <span id="sfp-water-val" class="font-mono text-ocean-400 font-bold">120 L/s</span>
+                            </div>
+                            <input type="range" id="sfp-water-slider" min="30" max="250" value="120" class="w-full" oninput="calculateSFPYields()">
+                        </div>
+
+                        <!-- Relative Humidity Input -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <label class="font-semibold text-slate-300 flex items-center gap-1.5">
+                                    <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-bio-400"></i> Ambient Greenhouse Humidity
+                                </label>
+                                <span id="sfp-humid-val" class="font-mono text-bio-400 font-bold">65%</span>
+                            </div>
+                            <input type="range" id="sfp-humid-slider" min="30" max="95" value="65" class="w-full" oninput="calculateSFPYields()">
+                        </div>
+
+                        <div class="p-3 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                            <span class="text-amber-400 font-bold">System Coupling Synergy:</span>
+                            <p>Evaporative cooling lowers solar panel surface temperatures, boosting PV energy efficiency by up to +14%.</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Flow Diagram & Outputs -->
+                    <div class="lg:col-span-2 space-y-6 flex flex-col justify-between">
+                        
+                        <!-- Flow Diagram Node Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            
+                            <!-- Node 1 -->
+                            <div class="glass-panel p-4 rounded-xl space-y-2 border-t-2 border-amber-400">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-amber-400 font-mono uppercase font-bold">Stage 1</span>
+                                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                                </div>
+                                <h5 class="text-xs font-bold text-white">Solar Energy Generation</h5>
+                                <p class="text-[11px] text-slate-400">Concentrated solar arrays power pumps and desalination units continuously.</p>
+                                <div class="pt-2 border-t border-slate-800 flex justify-between text-xs font-mono">
+                                    <span class="text-slate-400">Power Output:</span>
+                                    <span id="out-power" class="text-amber-400 font-bold">14.2 MW</span>
+                                </div>
+                            </div>
+
+                            <!-- Node 2 -->
+                            <div class="glass-panel p-4 rounded-xl space-y-2 border-t-2 border-ocean-400">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-ocean-400 font-mono uppercase font-bold">Stage 2</span>
+                                    <i data-lucide="droplet" class="w-4 h-4 text-ocean-400"></i>
+                                </div>
+                                <h5 class="text-xs font-bold text-white">Seawater Greenhouse</h5>
+                                <p class="text-[11px] text-slate-400">Evaporative cooling pads humidify air; condensers yield pure freshwater.</p>
+                                <div class="pt-2 border-t border-slate-800 flex justify-between text-xs font-mono">
+                                    <span class="text-slate-400">Water Output:</span>
+                                    <span id="out-water" class="text-ocean-400 font-bold">8,400 m³/d</span>
+                                </div>
+                            </div>
+
+                            <!-- Node 3 -->
+                            <div class="glass-panel p-4 rounded-xl space-y-2 border-t-2 border-bio-400">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-bio-400 font-mono uppercase font-bold">Stage 3</span>
+                                    <i data-lucide="trees" class="w-4 h-4 text-bio-400"></i>
+                                </div>
+                                <h5 class="text-xs font-bold text-white">Desert Revegetation</h5>
+                                <p class="text-[11px] text-slate-400">Outflow moisture supports crops and outdoor desert carbon sinks.</p>
+                                <div class="pt-2 border-t border-slate-800 flex justify-between text-xs font-mono">
+                                    <span class="text-slate-400">Crop Yield:</span>
+                                    <span id="out-crop" class="text-bio-400 font-bold">420 Tons/yr</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Realtime Simulated Impact Cards -->
+                        <div class="glass-panel p-5 rounded-xl border border-slate-800 space-y-3">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">Simulated Annual Ecological & Economic Impact</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                    <span class="text-[10px] text-slate-400 block font-mono">Annual CO₂ Offset</span>
+                                    <span id="sfp-out-co2" class="text-lg font-extrabold text-bio-400 font-mono">82,450 t</span>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                    <span class="text-[10px] text-slate-400 block font-mono">Desalination Cost</span>
+                                    <span id="sfp-out-cost" class="text-lg font-extrabold text-amber-400 font-mono">$0.42 / m³</span>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 col-span-2 sm:col-span-1">
+                                    <span class="text-[10px] text-slate-400 block font-mono">Arable Land Restored</span>
+                                    <span id="sfp-out-land" class="text-lg font-extrabold text-ocean-400 font-mono">148 Hectares</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Feasibility, Capital Requirements & Geographic Dependencies -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-5 rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i> Capital & Infrastructure
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        High initial CAPEX required for solar mirrors, inland seawater pipelines, and greenhouse construction. Financing requires multi-stakeholder international investment.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 text-ocean-400 font-bold text-sm">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> Geographic Dependencies
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Highly dependent on low-lying hyper-arid coastal deserts with high solar irradiation and direct access to seawater (e.g., Qatar, Jordan, North Africa).
+                    </p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 text-bio-400 font-bold text-sm">
+                        <i data-lucide="wrench" class="w-4 h-4"></i> Technical Complexity
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Requires synchronized maintenance across solar optical surfaces, biological crop protection, and anti-scaling seawater pipe maintenance.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 4: COMPARATIVE ANALYSIS & SYNERGY LAB -->
+        <section id="section-synergy" class="tab-content hidden space-y-8">
+            
+            <!-- Header -->
+            <div class="glass-panel p-6 rounded-xl border border-ocean-500/20">
+                <div class="inline-flex items-center gap-2 text-xs font-semibold text-ocean-400 uppercase tracking-wider mb-1">
+                    <i data-lucide="git-compare" class="w-3.5 h-3.5"></i> Strategic Matrix
+                </div>
+                <h2 class="text-2xl font-bold text-white">Comparative Analysis & Synergy Laboratory</h2>
+                <p class="text-xs text-slate-400 mt-1">Comparing microscale diatom nanofiltration with macroscale Sahara desert systems, and simulating their integrated performance.</p>
+            </div>
+
+            <!-- Comparison Table Matrix -->
+            <div class="glass-panel p-6 rounded-xl space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="table" class="w-4 h-4 text-bio-400"></i> Side-by-Side System Matrix
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left text-slate-300">
+                        <thead class="text-[11px] uppercase bg-slate-900/80 text-slate-400 font-mono">
+                            <tr>
+                                <th class="p-3">Dimension</th>
+                                <th class="p-3 text-ocean-400">Diatom Nanofiltration</th>
+                                <th class="p-3 text-amber-400">Sahara Forest Project</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Primary Scale</td>
+                                <td class="p-3">Microscale (Nanometer pores 10–200 nm)</td>
+                                <td class="p-3">Macroscale (Hectare-level ecosystem)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Core Technology</td>
+                                <td class="p-3">Silica frustule bio-membranes</td>
+                                <td class="p-3">Solar PV/CSP + Evaporative Seawater Greenhouses</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Target Output</td>
+                                <td class="p-3">Molecular contaminant removal & ultra-pure water</td>
+                                <td class="p-3">Freshwater, crops, clean power & desert carbon sinks</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Energy Profile</td>
+                                <td class="p-3">Passive/Ultra-low pressure hydraulic flow</td>
+                                <td class="p-3">100% Renewable self-powered solar energy loop</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-white">Primary Limitation</td>
+                                <td class="p-3">Silica structure fragility & bio-fabrication scale</td>
+                                <td class="p-3">High capital expense & coastal geographical dependence</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SYNERGY CALCULATOR / INTEGRATED VISION MODEL -->
+            <div class="glass-panel glass-panel-glow-green p-6 rounded-xl space-y-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold text-bio-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i> Integrated Hybrid Vision
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Synergy Calculator: Diatom + Sahara Forest Integration</h3>
+                    <p class="text-xs text-slate-400 mt-1">What happens when Diatom Nanofiltration membranes replace conventional thermal/RO units inside Sahara Seawater Greenhouses?</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Synergy Interactive Controls -->
+                    <div class="glass-panel p-5 rounded-lg border border-slate-800 space-y-5">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">Hybrid Configuration Parameters</h4>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-300 font-semibold block">Diatom Membrane Integration Level</label>
+                            <input type="range" id="synergy-membrane-slider" min="0" max="100" value="75" class="w-full" oninput="calculateSynergy()">
+                            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                                <span>0% (Standard RO)</span>
+                                <span>100% (Full Diatom)</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-300 font-semibold block">Target Water Purification Volume</label>
+                            <input type="range" id="synergy-vol-slider" min="1000" max="50000" step="1000" value="15000" class="w-full" oninput="calculateSynergy()">
+                            <div class="flex justify-between text-[10px] font-mono text-ocean-400 font-bold">
+                                <span>Volume:</span>
+                                <span id="syn-vol-text">15,000 m³/day</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Interactive Visual Metrics -->
+                    <div class="lg:col-span-2 glass-panel p-5 rounded-lg border border-slate-800 space-y-4 flex flex-col justify-between">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">Synergistic Efficiency Gains</h4>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Energy Saved -->
+                            <div class="bg-slate-900/80 p-4 rounded-lg border border-bio-500/30">
+                                <div class="flex justify-between items-center text-bio-400 mb-1">
+                                    <span class="text-[10px] font-mono uppercase">Energy Consumption</span>
+                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                                </div>
+                                <span id="syn-energy-saved" class="text-2xl font-extrabold text-bio-400 font-mono">-38.5%</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Lower hydraulic head pressure required.</p>
+                            </div>
+
+                            <!-- Membrane Lifespan -->
+                            <div class="bg-slate-900/80 p-4 rounded-lg border border-ocean-500/30">
+                                <div class="flex justify-between items-center text-ocean-400 mb-1">
+                                    <span class="text-[10px] font-mono uppercase">Membrane Lifespan</span>
+                                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                                </div>
+                                <span id="syn-lifespan" class="text-2xl font-extrabold text-ocean-400 font-mono">+2.4x</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Silica biofouling resistance.</p>
+                            </div>
+
+                            <!-- OPEX Reduction -->
+                            <div class="bg-slate-900/80 p-4 rounded-lg border border-amber-500/30">
+                                <div class="flex justify-between items-center text-amber-400 mb-1">
+                                    <span class="text-[10px] font-mono uppercase">Annual OPEX Savings</span>
+                                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                                </div>
+                                <span id="syn-opex" class="text-2xl font-extrabold text-amber-400 font-mono">$1.24M</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Reduced chemical backwash & energy costs.</p>
+                            </div>
+                        </div>
+
+                        <!-- Vision Summary Box -->
+                        <div class="p-3 bg-bio-900/20 border border-bio-500/30 rounded-lg text-xs text-slate-300 leading-relaxed">
+                            <strong class="text-bio-400">The Ultimate Biomimicry Loop:</strong> By utilizing diatom-derived nanoporous membranes to pre-treat incoming seawater in Sahara Forest Greenhouses, the system eliminates toxic brine chemical backwash, halves solar power consumption per liter of water produced, and accelerates desert reforestation.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 5: QUIZ & REFERENCES -->
+        <section id="section-quiz" class="tab-content hidden space-y-8">
+            
+            <!-- Quiz Card -->
+            <div class="glass-panel glass-panel-glow-blue p-6 lg:p-8 rounded-xl space-y-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold text-ocean-400 uppercase tracking-wider mb-1">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Knowledge Check
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Interactive Research Quiz</h2>
+                    <p class="text-xs text-slate-400 mt-1">Test your understanding of diatom biology, nanoporous filtration, and the Sahara Forest Project.</p>
+                </div>
+
+                <!-- Quiz Form Container -->
+                <div id="quiz-container" class="space-y-6">
+                    
+                    <!-- Q1 -->
+                    <div class="glass-panel p-5 rounded-lg border border-slate-800 space-y-3">
+                        <p class="text-sm font-bold text-white flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-ocean-500/20 border border-ocean-500 text-ocean-400 flex items-center justify-center text-xs font-mono">1</span>
+                            What are diatom frustules made of, and what is their primary pore size range?
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <button onclick="selectOption(1, 'A')" id="q1-A" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                A) Synthetic polymer; 1–5 mm
+                            </button>
+                            <button onclick="selectOption(1, 'B')" id="q1-B" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                B) Biological hydrated silica; 10–200 nm
+                            </button>
+                            <button onclick="selectOption(1, 'C')" id="q1-C" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                C) Calcium carbonate; 500–1000 nm
+                            </button>
+                            <button onclick="selectOption(1, 'D')" id="q1-D" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                D) Cellulose fibers; 10–50 µm
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="glass-panel p-5 rounded-lg border border-slate-800 space-y-3">
+                        <p class="text-sm font-bold text-white flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-ocean-500/20 border border-ocean-500 text-ocean-400 flex items-center justify-center text-xs font-mono">2</span>
+                            Approximately what percentage of global carbon capture do natural diatoms perform?
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <button onclick="selectOption(2, 'A')" id="q2-A" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                A) ~5%
+                            </button>
+                            <button onclick="selectOption(2, 'B')" id="q2-B" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                B) ~20%
+                            </button>
+                            <button onclick="selectOption(2, 'C')" id="q2-C" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                C) ~50%
+                            </button>
+                            <button onclick="selectOption(2, 'D')" id="q2-D" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                D) ~80%
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="glass-panel p-5 rounded-lg border border-slate-800 space-y-3">
+                        <p class="text-sm font-bold text-white flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-ocean-500/20 border border-ocean-500 text-ocean-400 flex items-center justify-center text-xs font-mono">3</span>
+                            How does the Sahara Forest Project achieve high energy efficiency in desert crop production?
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <button onclick="selectOption(3, 'A')" id="q3-A" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                A) By importing diesel generators for water cooling
+                            </button>
+                            <button onclick="selectOption(3, 'B')" id="q3-B" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                B) By coupling solar power with evaporative seawater greenhouses & revegetation
+                            </button>
+                            <button onclick="selectOption(3, 'C')" id="q3-C" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                C) By relying exclusively on groundwater pumping
+                            </button>
+                            <button onclick="selectOption(3, 'D')" id="q3-D" class="quiz-opt p-3 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-ocean-400 text-left text-slate-300 transition">
+                                D) By deploying synthetic rainfall cloud-seeding rockets
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Action & Score Banner -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 pt-4">
+                        <button onclick="submitQuiz()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-bio-500 hover:bg-bio-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Submit Answers
+                        </button>
+                        <div id="quiz-result" class="hidden text-sm font-bold font-mono"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Scientific References Section -->
+            <div class="glass-panel p-6 rounded-xl space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="book-marked" class="w-4 h-4 text-amber-400"></i> Academic References & Literature
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-1">
+                        <p class="text-slate-200 font-semibold">Round, F.E., Crawford, R.M., & Mann, D.G. (1990)</p>
+                        <p class="text-slate-400 italic">The Diatoms: Biology and Morphology of the Genera.</p>
+                        <p class="text-ocean-400 text-[10px]">Cambridge University Press.</p>
+                    </div>
+
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-1">
+                        <p class="text-slate-200 font-semibold">Losic, D., Mitchell, J.G., & Voelcker, N.H. (2009)</p>
+                        <p class="text-slate-400 italic">Diatomaceous silica as a new nanoporous material for microfluidics and biosensing.</p>
+                        <p class="text-ocean-400 text-[10px]">Advanced Materials, 21(29), 2947–2956.</p>
+                    </div>
+
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-1">
+                        <p class="text-slate-200 font-semibold">Sahara Forest Project Foundation (2020)</p>
+                        <p class="text-slate-400 italic">Pilot Project Execution Report: Qatar & Jordan Operations.</p>
+                        <p class="text-amber-400 text-[10px]">sfp.no Official Repository.</p>
+                    </div>
+
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-1">
+                        <p class="text-slate-200 font-semibold">Hildebrand, M. (2008)</p>
+                        <p class="text-slate-400 italic">Diatoms, Biomineralization Processes, and Genomics.</p>
+                        <p class="text-bio-400 text-[10px]">Chemical Reviews, 108(11), 4855–4874.</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-slate-800/80 px-4 lg:px-8 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p>© 2026 Biomimicry Environmental Engineering Project | Presented by Divyarth Mote & Vansh Tunwal</p>
+            <div class="flex items-center gap-4 text-[11px] text-slate-400">
+                <span>Diatom Nanofiltration</span>
+                <span>•</span>
+                <span>Sahara Forest Project</span>
+                <span>•</span>
+                <span class="text-ocean-400 font-mono">Interactive Web Dashboard</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT SIMULATIONS AND INTERACTIVITY LOGIC -->
+    <script>
+        // --- LUCIDE ICONS INITIALIZATION ---
+        lucide.createIcons();
+
+        // --- TAB SWITCHING SYSTEM ---
+        function switchTab(tabId) {
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected section
+            const targetSection = document.getElementById(`section-${tabId}`);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            // Highlight tab button
+            const targetBtn = document.getElementById(`tab-${tabId}`);
+            if (targetBtn) targetBtn.classList.add('active');
+
+            // Resize canvas if switching to diatom tab
+            if (tabId === 'diatom') {
+                setTimeout(resizeCanvas, 50);
+            }
+        }
+
+        // --- DIATOM CANVAS SIMULATOR ENGINE ---
+        const canvas = document.getElementById('diatomCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+
+        let animationFrameId = null;
+        let isSimRunning = true;
+
+        let poreDiameterNm = 50; // default 50nm
+        let flowVelocity = 3;    // scale 1 to 5
+
+        // Particles Array
+        let particles = [];
+        const MAX_PARTICLES = 120;
+
+        // Particle Types definition
+        const PARTICLE_TYPES = [
+            { name: 'Water', sizeNm: 0.3, radius: 2.5, color: '#67e8f9', pass: true },
+            { name: 'HeavyMetal', sizeNm: 15, radius: 4, color: '#c084fc', pass: true },
+            { name: 'Pathogen', sizeNm: 45, radius: 6, color: '#fbbf24', pass: false },
+            { name: 'Bacteria', sizeNm: 110, radius: 9, color: '#ef4444', pass: false },
+            { name: 'Microplastic', sizeNm: 160, radius: 12, color: '#ec4899', pass: false }
+        ];
+
+        let statTrapped = 0;
+        let statPassed = 0;
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function createParticle() {
+            // Random particle type weighted towards water
+            const rand = Math.random();
+            let type;
+            if (rand < 0.45) type = PARTICLE_TYPES[0];      // Water
+            else if (rand < 0.60) type = PARTICLE_TYPES[1]; // Metal
+            else if (rand < 0.75) type = PARTICLE_TYPES[2]; // Pathogen
+            else if (rand < 0.88) type = PARTICLE_TYPES[3]; // Bacteria
+            else type = PARTICLE_TYPES[4];                  // Microplastic
+
+            return {
+                x: -15,
+                y: Math.random() * (canvas.height - 30) + 15,
+                radius: type.radius,
+                sizeNm: type.sizeNm,
+                color: type.color,
+                vx: (Math.random() * 0.8 + 1) * (flowVelocity * 0.8),
+                vy: (Math.random() - 0.5) * 0.5,
+                type: type.name,
+                status: 'moving' // 'moving', 'trapped', 'passed'
+            };
+        }
+
+        function initSimulation() {
+            if (!canvas) return;
+            resizeCanvas();
+            particles = [];
+            for (let i = 0; i < 40; i++) {
+                const p = createParticle();
+                p.x = Math.random() * (canvas.width * 0.4);
+                particles.push(p);
+            }
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            runSimulation();
+        }
+
+        function updateSimParams() {
+            const poreSlider = document.getElementById('pore-slider');
+            const flowSlider = document.getElementById('flow-slider');
+            if (poreSlider) {
+                poreDiameterNm = parseInt(poreSlider.value);
+                document.getElementById('pore-val').innerText = `${poreDiameterNm} nm`;
+            }
+            if (flowSlider) {
+                flowVelocity = parseInt(flowSlider.value);
+                const flowLabels = ['Very Low', 'Low', 'Medium', 'High', 'Ultra High'];
+                document.getElementById('flow-val').innerText = flowLabels[flowVelocity - 1];
+            }
+
+            // Update status text
+            const statusText = document.getElementById('filter-status-text');
+            if (statusText) {
+                if (poreDiameterNm <= 20) {
+                    statusText.innerText = "Blocking Heavy Metals, Pathogens, Bacteria & Microplastics";
+                    statusText.className = "text-bio-400 font-semibold";
+                } else if (poreDiameterNm <= 50) {
+                    statusText.innerText = "Blocking Pathogens, Bacteria & Microplastics";
+                    statusText.className = "text-bio-400 font-semibold";
+                } else if (poreDiameterNm <= 120) {
+                    statusText.innerText = "Blocking Bacteria & Microplastics (Pathogens Permeate)";
+                    statusText.className = "text-amber-400 font-semibold";
+                } else {
+                    statusText.innerText = "Coarse Pore: Only Blocking Microplastics";
+                    statusText.className = "text-red-400 font-semibold";
+                }
+            }
+        }
+
+        function toggleSimulation() {
+            isSimRunning = !isSimRunning;
+            const btnText = document.getElementById('sim-btn-text');
+            const icon = document.getElementById('sim-icon');
+            if (isSimRunning) {
+                if (btnText) btnText.innerText = "Pause Simulation";
+                if (icon) icon.setAttribute('data-lucide', 'pause');
+                runSimulation();
+            } else {
+                if (btnText) btnText.innerText = "Resume Simulation";
+                if (icon) icon.setAttribute('data-lucide', 'play');
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            }
+            lucide.createIcons();
+        }
+
+        function resetSimulation() {
+            statTrapped = 0;
+            statPassed = 0;
+            updateStatsUI();
+            initSimulation();
+        }
+
+        function updateStatsUI() {
+            const trappedEl = document.getElementById('stat-trapped');
+            const passedEl = document.getElementById('stat-passed');
+            const effEl = document.getElementById('stat-efficiency');
+
+            if (trappedEl) trappedEl.innerText = statTrapped;
+            if (passedEl) passedEl.innerText = statPassed;
+
+            if (effEl) {
+                const total = statTrapped + statPassed;
+                if (total === 0) effEl.innerText = '100%';
+                else {
+                    const eff = Math.min(99.9, Math.max(70.0, (statTrapped / (statTrapped + (statPassed * 0.15))) * 100)).toFixed(1);
+                    effEl.innerText = `${eff}%`;
+                }
+            }
+        }
+
+        function runSimulation() {
+            if (!isSimRunning || !canvas || !ctx) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Membrane Wall X position (Middle of Canvas)
+            const membraneX = canvas.width * 0.55;
+            const numPores = 7;
+            const poreGap = canvas.height / numPores;
+
+            // Draw Nanopore Membrane Barrier
+            ctx.fillStyle = '#0f2b48';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+
+            // Visual height of pore opening scaled to slider
+            const poreOpeningHeight = Math.max(8, (poreDiameterNm / 200) * (poreGap * 0.65));
+
+            for (let i = 0; i < numPores; i++) {
+                const yTop = i * poreGap;
+                const blockHeight = poreGap - poreOpeningHeight;
+
+                // Draw Silica Barrier Segment
+                ctx.fillStyle = 'rgba(15, 43, 72, 0.85)';
+                ctx.fillRect(membraneX - 12, yTop, 24, blockHeight);
+                ctx.strokeRect(membraneX - 12, yTop, 24, blockHeight);
+
+                // Silica nanopore inner grid lines
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.moveTo(membraneX - 12, yTop + blockHeight / 2);
+                ctx.lineTo(membraneX + 12, yTop + blockHeight / 2);
+                ctx.stroke();
+            }
+
+            // Spawn new particles if below MAX
+            if (particles.length < MAX_PARTICLES && Math.random() < 0.35) {
+                particles.push(createParticle());
+            }
+
+            // Update & Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+
+                if (p.status === 'moving') {
+                    p.vx = (Math.abs(p.vx) + 0.1) * (flowVelocity * 0.4);
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // Collision check with Membrane Barrier
+                    if (p.x + p.radius >= membraneX - 12 && p.x - p.radius <= membraneX + 12) {
+                        
+                        // Check if particle y aligns with any pore opening
+                        const poreIndex = Math.floor(p.y / poreGap);
+                        const poreTop = (poreIndex * poreGap) + (poreGap - poreOpeningHeight);
+                        const poreBottom = (poreIndex + 1) * poreGap;
+
+                        const isInsidePoreOpening = (p.y >= poreTop + p.radius && p.y <= poreBottom - p.radius);
+
+                        // Can particle physically pass through based on pore size?
+                        if (isInsidePoreOpening && p.sizeNm <= poreDiameterNm) {
+                            // Particle Passes Through
+                            p.status = 'moving'; // Keeps moving through
+                        } else {
+                            // Particle Trapped / Blocked at membrane boundary
+                            p.status = 'trapped';
+                            p.x = membraneX - 14 - p.radius;
+                            p.vx = 0;
+                            p.vy = (Math.random() - 0.5) * 0.2; // slight drift
+                            statTrapped++;
+                            updateStatsUI();
+                        }
+                    }
+
+                    // Check if particle safely reached permeate yield zone
+                    if (p.x > membraneX + 30 && p.status !== 'passed') {
+                        p.status = 'passed';
+                        statPassed++;
+                        updateStatsUI();
+                    }
+                } else if (p.status === 'trapped') {
+                    // Slowly drift down trapped particles
+                    p.y += p.vy;
+                }
+
+                // Draw Particle
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset blur
+
+                // Remove offscreen particles
+                if (p.x > canvas.width + 20 || p.y < -20 || p.y > canvas.height + 20) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(runSimulation);
+        }
+
+        // --- SAHARA FOREST PROJECT SIMULATOR CALCULATOR ---
+        function calculateSFPYields() {
+            const solar = parseInt(document.getElementById('sfp-solar-slider').value);
+            const water = parseInt(document.getElementById('sfp-water-slider').value);
+            const humid = parseInt(document.getElementById('sfp-humid-slider').value);
+
+            // Live Update UI Labels
+            document.getElementById('sfp-solar-val').innerText = `${solar}%`;
+            document.getElementById('sfp-water-val').innerText = `${water} L/s`;
+            document.getElementById('sfp-humid-val').innerText = `${humid}%`;
+
+            // Calculations
+            const powerMW = ((solar / 100) * 16.5).toFixed(1);
+            const waterM3 = Math.round(water * (solar / 100) * (humid / 60) * 75);
+            const cropTons = Math.round((waterM3 / 20) * (humid / 65));
+            const co2Offset = Math.round(waterM3 * 9.8 + solar * 120);
+            const costPerM3 = (0.65 - (solar / 200) - (water / 1000)).toFixed(2);
+            const landHectares = Math.round((waterM3 / 55));
+
+            // DOM Updates
+            document.getElementById('out-power').innerText = `${powerMW} MW`;
+            document.getElementById('out-water').innerText = `${waterM3.toLocaleString()} m³/d`;
+            document.getElementById('out-crop').innerText = `${cropTons.toLocaleString()} Tons/yr`;
+            document.getElementById('sfp-out-co2').innerText = `${co2Offset.toLocaleString()} t`;
+            document.getElementById('sfp-out-cost').innerText = `$${costPerM3} / m³`;
+            document.getElementById('sfp-out-land').innerText = `${landHectares} Hectares`;
+        }
+
+        // --- SYNERGY CALCULATOR ---
+        function calculateSynergy() {
+            const membraneLevel = parseInt(document.getElementById('synergy-membrane-slider').value);
+            const volume = parseInt(document.getElementById('synergy-vol-slider').value);
+
+            document.getElementById('syn-vol-text').innerText = `${volume.toLocaleString()} m³/day`;
+
+            const energySaving = ((membraneLevel / 100) * 48.0).toFixed(1);
+            const lifespanFactor = (1.0 + (membraneLevel / 100) * 1.8).toFixed(1);
+            const opexSavingMillions = (((volume * 365 * 0.35) * (membraneLevel / 100)) / 1000000).toFixed(2);
+
+            document.getElementById('syn-energy-saved').innerText = `-${energySaving}%`;
+            document.getElementById('syn-lifespan').innerText = `+${lifespanFactor}x`;
+            document.getElementById('syn-opex').innerText = `$${opexSavingMillions}M`;
+        }
+
+        // --- QUIZ LOGIC ---
+        const userAnswers = { 1: null, 2: null, 3: null };
+        const correctAnswers = { 1: 'B', 2: 'B', 3: 'B' };
+
+        function selectOption(qNum, opt) {
+            userAnswers[qNum] = opt;
+            // Highlight selected button
+            ['A', 'B', 'C', 'D'].forEach(letter => {
+                const btn = document.getElementById(`q${qNum}-${letter}`);
+                if (btn) {
+                    if (letter === opt) {
+                        btn.classList.add('border-ocean-400', 'bg-ocean-500/20', 'text-white');
+                        btn.classList.remove('bg-slate-900/60', 'text-slate-300');
+                    } else {
+                        btn.classList.remove('border-ocean-400', 'bg-ocean-500/20', 'text-white');
+                        btn.classList.add('bg-slate-900/60', 'text-slate-300');
+                    }
+                }
+            });
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            let answeredAll = true;
+
+            for (let q = 1; q <= 3; q++) {
+                if (!userAnswers[q]) {
+                    answeredAll = false;
+                    break;
+                }
+                if (userAnswers[q] === correctAnswers[q]) {
+                    score++;
+                }
+            }
+
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.classList.remove('hidden');
+
+            if (!answeredAll) {
+                resultDiv.className = "text-amber-400 font-mono text-xs";
+                resultDiv.innerText = "Please answer all 3 questions before submitting.";
+                return;
+            }
+
+            if (score === 3) {
+                resultDiv.className = "text-bio-400 font-mono text-sm";
+                resultDiv.innerText = `Perfect Score! 3 / 3 (100%) - Outstanding biomimicry understanding.`;
+            } else {
+                resultDiv.className = "text-amber-400 font-mono text-sm";
+                resultDiv.innerText = `Score: ${score} / 3. Review the Diatom & Sahara tabs and try again!`;
+            }
+        }
+
+        // --- WINDOW ONLOAD INITIALIZATION ---
+        window.onload = function () {
+            updateSimParams();
+            initSimulation();
+            calculateSFPYields();
+            calculateSynergy();
+        };
+    </script>
+</body>
+</html>
